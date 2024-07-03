@@ -849,7 +849,10 @@ void SampleRemoteApp::ConnectOrListen()
         {
             m_options.port = 8265;
         }
-
+        m_options.listen = true;
+        m_options.port = 8265;
+        m_options.transportPort = 8266;
+        m_options.hostname = L"192.168.0.142";
         if (m_options.listen)
         {
             if (m_options.ephemeralPort)
@@ -880,6 +883,7 @@ void SampleRemoteApp::ConnectOrListen()
     }
     catch (winrt::hresult_error& e)
     {
+        m_options.listen = true;
         if (m_options.listen)
         {
             DebugLog(L"Listen failed with hr = 0x%08X", e.code());

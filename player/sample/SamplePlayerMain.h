@@ -69,10 +69,10 @@ private:
     // Options for the player which can passed in via activation arguments
     struct PlayerOptions
     {
-        winrt::hstring m_hostname = L"0.0.0.0";
+        winrt::hstring m_hostname = L"192.168.0.142";
         uint16_t m_port = 0;
-        bool m_listen = true;
-        bool m_showStatistics = false;
+        bool m_listen = false;
+        bool m_showStatistics = true;
         bool m_ipv6 = false;
     };
 
@@ -134,6 +134,8 @@ private:
 #ifdef ENABLE_USER_COORDINATE_SYSTEM_SAMPLE
     // Renders a colored holographic cube that's 20 centimeters wide. This sample content is used to demonstrate rendering in the user
     // coordinate system.
+    //"20센티미터 너비의 컬러 홀로그래픽 큐브를 렌더링합니다. 이 샘플 콘텐츠는 사용자 좌표 시스템에서 렌더링을 시연하기 위해 "
+    //"사용됩니다."
     std::unique_ptr<SimpleCubeRenderer> m_simpleCubeRenderer;
 
     // The userSpatialFrameOfReference.
@@ -150,6 +152,7 @@ private:
     std::shared_ptr<IIpAddressUpdater> m_ipAddressUpdater;
 
     // Accumulates and provides remote frame statistics
+    //"원격 프레임 통계를 누적하고 제공합니다."
     PlayerFrameStatisticsHelper m_statisticsHelper;
     ErrorHelper m_errorHelper;
 
@@ -186,5 +189,6 @@ private:
     bool m_shownFeedbackToUser = false;
 
     // Indicates that at least one remote frame was blitted
+    // 적어도 하나의 원격 프레임이 블리트되었음
     bool m_firstRemoteFrameWasBlitted = false;
 };

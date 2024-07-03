@@ -260,7 +260,9 @@
     <ClInclude Include="..\..\common\SimpleCubeRenderer.h" />
     <ClCompile Include="..\common\holographic\RemoteWindowHolographicWin32.cpp" />
     <ClInclude Include="..\common\holographic\RemoteWindowHolographicWin32.h" />
-    <AppxManifest Include=".\Package.appxmanifest" />
+    <AppxManifest Include=".\Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
     <FXCompile Include="..\common\holographic\shaders\SRMesh_VertexShader.hlsl">
       <EntryPointName>main</EntryPointName>
       <ShaderType>Vertex</ShaderType>

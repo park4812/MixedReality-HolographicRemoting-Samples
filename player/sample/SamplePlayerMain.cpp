@@ -57,7 +57,9 @@ void SamplePlayerMain::ConnectOrListen()
     m_playerContext.Disconnect();
 
     UpdateStatusDisplay();
-
+    //m_playerOptions.m_listen = false;
+    //winrt::hstring ip_address = L"192.168.0.142";
+    //m_playerOptions.m_hostname = ip_address;
     // Try to establish a connection as specified in m_playerOptions
     try
     {
@@ -70,7 +72,12 @@ void SamplePlayerMain::ConnectOrListen()
             // The hostname specifies the local address on which the player listens on.
             // Use the port as the handshake port (where clients always connect to first), and port + 1 for the
             // primary transport implementation (clients are redirected to this port as part of the handshake).
+            // PlayerContext를 네트워크 서버 모드로 설정합니다. 이 모드에서 플레이어는 들어오는 네트워크 연결을 대기합니다.
+            // 호스트 이름은 플레이어가 연결을 대기하는 로컬 주소를 지정합니다.
+            // 포트를 핸드셰이크 포트로 사용하세요(클라이언트가 먼저 연결하는 포트), 그리고 포트 + 1을 기본 전송 구현 포트로
+            // 사용하세요(클라이언트는 핸드셰이크의 일부로 이 포트로 리디렉션됩니다).
             m_playerContext.Listen(m_playerOptions.m_hostname, port, port + 1);
+            //m_playerContext.Listen(ip_address, 8265, 8266);
         }
         else
         {
@@ -78,7 +85,11 @@ void SamplePlayerMain::ConnectOrListen()
             // In this mode the player tries to establish a network connection to the provided hostname at the given port.
             // The port specifies the server's handshake port. The primary transport port will be specified by the server as part of the
             // handshake.
+            // PlayerContext를 네트워크 클라이언트 모드로 설정합니다.
+            // 이 모드에서 플레이어는 주어진 포트에서 제공된 호스트 이름으로 네트워크 연결을 설정하려고 시도합니다.
+            // 포트는 서버의 핸드셰이크 포트를 지정합니다. 기본 전송 포트는 핸드셰이크의 일부로 서버에 의해 지정될 것입니다.
             m_playerContext.Connect(m_playerOptions.m_hostname, port);
+            //m_playerContext.Connect(ip_address, 8265);
         }
     }
     catch (winrt::hresult_error& ex)
@@ -122,6 +133,10 @@ HolographicFrame SamplePlayerMain::Update(float deltaTimeInSeconds, const Hologr
     // Note, this is done with the data from the previous frame before the next wait to save CPU time and get the remote frame presented as
     // fast as possible. This also means that focus point and status display position are one frame behind which is a reasonable tradeoff
     // for the time we win.
+    // 상태 및 오류 디스플레이의 위치를 업데이트합니다.
+    // 참고로, 이 작업은 CPU 시간을 절약하고 리모트 프레임을 가능한 빨리 표시하기 위해 다음 대기 전에 이전 프레임의 데이터로 수행됩니다.
+    // 이는 포커스 포인트와 상태 디스플레이 위치가 한 프레임 뒤쳐지는 것을 의미하는데, 이는 우리가 얻는 시간을 위한 합리적인 타협입니다.
+
     if (prevHolographicFrame != nullptr && m_attachedFrameOfReference != nullptr)
     {
         HolographicFramePrediction prevPrediction = prevHolographicFrame.CurrentPrediction();
@@ -145,8 +160,10 @@ HolographicFrame SamplePlayerMain::Update(float deltaTimeInSeconds, const Hologr
     }
 
     // Update content of the status and error display.
+    // 상태 및 오류 디스플레이의 내용을 업데이트합니다.
     {
         // Update the accumulated statistics with the statistics from the last frame.
+        // 마지막 프레임에서의 통계로 누적 통계를 업데이트합니다.
         m_statisticsHelper.Update(m_playerContext.LastFrameStatistics());
 
         const bool updateStats = m_statisticsHelper.StatisticsHaveChanged() && m_playerOptions.m_showStatistics;
@@ -180,6 +197,10 @@ HolographicFrame SamplePlayerMain::Update(float deltaTimeInSeconds, const Hologr
         // Note, we don't wait for the next frame on present which allows us to first update all view independent stuff and also create the
         // next frame before we actually wait. By doing so everything before the wait is executed while the previous frame is presented by
         // the OS and thus saves us quite some CPU time after the wait.
+        // 참고로, 다음 프레임을 표시할 때까지 기다리지 않습니다. 이를 통해 먼저 모든 뷰와 독립적인 요소들을 업데이트하고 실제로 기다리기 전에
+        // 다음 프레임을 생성할 수 있습니다. 이렇게 함으로써 기다리기 전에 모든 작업이 실행되며 이전 프레임이 운영체제에 의해 표시되는 동안
+        // 상당한 CPU 시간을 절약할 수 있습니다.
+
         m_deviceResources->WaitForNextFrameReady();
     }
     holographicFrame.UpdateCurrentPrediction();
@@ -378,32 +399,50 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
 {
     // Create the player context
     // IMPORTANT: This must be done before creating the HolographicSpace (or any other call to the Holographic API).
+    // 플레이어 컨텍스트 생성
+    // 중요: 이 작업은 홀로그래픽 공간(또는 홀로그래픽 API에 대한 다른 호출)을 생성하기 전에 수행되어야 합니다.
+
     try
     {
+        // 홀로그래픽 디스플레이 장치로 스트리밍하는 기술
         m_playerContext = PlayerContext::Create();
     }
     catch (winrt::hresult_error)
     {
         // If we get here, it is likely that no Windows Holographic is installed.
+        // 여기에 도달했다면, 윈도우 홀로그래픽이 설치되어 있지 않을 가능성이 높습니다.
+
         m_failedToCreatePlayerContext = true;
         // Return right away to avoid bringing down the application. This allows us to
         // later provide feedback to users about this failure.
+        // 애플리케이션을 종료하지 않도록 즉시 반환합니다.
+        // 이를 통해 나중에 사용자에게 이 실패에 대한 피드백을 제공할 수 있습니다.
+
         return;
     }
 
     // Register to the PlayerContext connection events
+    // PlayerContext 연결 이벤트에 등록
+
     m_playerContext.OnConnected({this, &SamplePlayerMain::OnConnected});
     m_playerContext.OnDisconnected({this, &SamplePlayerMain::OnDisconnected});
     m_playerContext.OnRequestRenderTargetSize({this, &SamplePlayerMain::OnRequestRenderTargetSize});
 
     // Set the BlitRemoteFrame timeout to 0.5s
+    // BlitRemoteFrame 타임아웃을 0.5초로 설정합니다.
+
     m_playerContext.BlitRemoteFrameTimeout(500ms);
 
     // Projection transform always reflects what has been configured on the remote side.
+    // 프로젝션 변환은 항상 원격 측에서 설정된 내용을 반영합니다.
+
     m_playerContext.ProjectionTransformConfig(ProjectionTransformMode::Remote);
 
     // Enable 10% overRendering with 10% resolution increase. With this configuration, the viewport gets increased by 5% in each direction
     // and the DPI remains equal.
+    // 10%의 해상도 증가로 10% 오버렌더링을 활성화합니다.
+    // 이 설정을 통해 뷰포트는 각 방향으로 5%씩 증가하고 DPI는 동일하게 유지됩니다.
+
     OverRenderingConfig overRenderingConfig;
     overRenderingConfig.HorizontalViewportIncrease = 0.1f;
     overRenderingConfig.VerticalViewportIncrease = 0.1f;
@@ -412,8 +451,12 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
     m_playerContext.ConfigureOverRendering(overRenderingConfig);
 
     // Register event handlers for app lifecycle.
+    // 앱 생명주기에 대한 이벤트 핸들러를 등록합니다.
+
+    //일시정지일때 발생하는 이벤트
     m_suspendingEventRevoker = CoreApplication::Suspending(winrt::auto_revoke, {this, &SamplePlayerMain::OnSuspending});
 
+    //활성화될때 발생하는 이벤트
     m_viewActivatedRevoker = applicationView.Activated(winrt::auto_revoke, {this, &SamplePlayerMain::OnViewActivated});
 
     m_deviceResources = std::make_shared<DXHelper::DeviceResourcesD3D11Holographic>();
@@ -517,17 +560,26 @@ void SamplePlayerMain::Run()
         Duration timeSinceLastUpdate = timeCurrUpdate - timeLastUpdate;
         float deltaTimeInSeconds = std::chrono::duration<float>(timeSinceLastUpdate).count();
 
+        //std::wostringstream woss;
+        //woss << deltaTimeInSeconds;
+        //m_errorHelper.AddError(woss.str());
+
+
         // If we encountered an error while creating the player context, we are going to provide
         // users with some feedback here. We have to do this after the application has launched
         // or we are going to fail at showing the dialog box.
+        //"플레이어 컨텍스트를 생성하는 동안 오류가 발생했다면, 여기서 사용자에게 피드백을 제공할 것입니다. 이 작업은 애플리케이션이 시작된 "
+        //"후에 수행해야 하며, 그렇지 않으면 대화 상자를 표시하는 데 실패할 것입니다."
         if (m_failedToCreatePlayerContext && !m_shownFeedbackToUser)
         {
             CoreWindow coreWindow{CoreApplication::MainView().CoreWindow().GetForCurrentThread()};
 
             // Window must be active or the MessageDialog will not show.
+            // 창이 활성화되어 있지 않으면 메시지 대화 상자가 표시되지 않습니다
             coreWindow.Activate();
 
             // Dispatch call to open MessageDialog.
+            // 메시지 대화 상자를 열기 위한 디스패치 호출
             coreWindow.Dispatcher().RunAsync(
                 winrt::Windows::UI::Core::CoreDispatcherPriority::Normal,
                 winrt::Windows::UI::Core::DispatchedHandler([]() -> winrt::fire_and_forget {
@@ -855,6 +907,11 @@ void SamplePlayerMain::OnCustomDataChannelDataReceived(winrt::array_view<const u
         // Get send queue size. The send queue size returns the size of data, that has not been send yet, in bytes. A big number can
         // indicate that more data is being queued for sending than is actually getting sent. If possible skip sending data in this
         // case, to help the queue getting smaller again.
+
+        // 전송 큐 크기를 가져옵니다. 전송 큐 크기는 아직 전송되지 않은 데이터의 크기를 바이트 단위로 반환합니다. 큰 숫자는 실제로 전송되는
+        // 것보다 더 많은 데이터가 전송을 위해 큐에 들어가고 있음을 나타낼 수 있습니다. 가능하다면 이 경우 데이터 전송을 건너뛰어 큐 크기가
+        // 다시 줄어들도록 도와주세요.
+
         uint32_t sendQueueSize = m_customDataChannel.SendQueueSize();
 
         // Only send the packet if the send queue is smaller than 1MiB
@@ -862,6 +919,7 @@ void SamplePlayerMain::OnCustomDataChannelDataReceived(winrt::array_view<const u
         {
             try
             {
+              //  m_errorHelper.AddError(answer.data());
                 m_customDataChannel.SendData(winrt::array_view<const uint8_t>{answer.data(), static_cast<uint32_t>(answer.size())}, true);
             }
             catch (...)
@@ -915,6 +973,9 @@ void SamplePlayerMain::OnRequestRenderTargetSize(
     // Store the new remote render target size
     // Note: We'll use the provided size as remote side content is going to be resampled/distorted anyway,
     // so there is no point in resolving this information into a smaller backbuffer on the player side.
+    // 새로운 원격 렌더 타깃 크기를 저장합니다.
+    // 참고: 제공된 크기를 사용할 것입니다. 원격 측 컨텐츠는 어차피 재샘플링되거나 왜곡될 예정이므로,
+    // 플레이어 측에서 이 정보를 더 작은 백버퍼로 해석할 필요가 없습니다.
     std::lock_guard lock{m_renderTargetSizeChangeMutex};
     m_needRenderTargetSizeChange = true;
     m_newRenderTargetSize = providedSize;

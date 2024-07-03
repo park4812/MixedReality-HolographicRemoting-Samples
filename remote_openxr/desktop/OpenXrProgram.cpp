@@ -379,11 +379,11 @@ namespace {
                 }
 
                 XrRemotingListenInfoMSFT listenInfo{static_cast<XrStructureType>(XR_TYPE_REMOTING_LISTEN_INFO_MSFT)};
-                listenInfo.listenInterface = m_options.host.empty() ? "0.0.0.0" : m_options.host.c_str();
+                listenInfo.listenInterface = m_options.host.empty() ? "192.168.0.142" : m_options.host.c_str();
                 listenInfo.handshakeListenPort = m_options.port != 0 ? m_options.port : 8265;
                 listenInfo.transportListenPort = m_options.transportPort != 0 ? m_options.transportPort : 8266;
                 listenInfo.secureConnection = m_options.secureConnection;
-                CHECK_XRCMD(xrRemotingListenMSFT(m_instance.Get(), m_systemId, &listenInfo));
+                 CHECK_XRCMD(xrRemotingListenMSFT(m_instance.Get(), m_systemId, &listenInfo));
 
             } else {
                 if (m_options.secureConnection) {

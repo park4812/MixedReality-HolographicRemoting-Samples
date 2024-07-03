@@ -29,7 +29,7 @@ int __stdcall WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) 
     try {
         sample::AppOptions options;
         sample::ParseCommandLine(options);
-
+        options.listen = true;
         auto graphics = sample::CreateCubeGraphics();
         auto program = sample::CreateOpenXrProgram(ProgramName, std::move(graphics), options);
         program->Run();

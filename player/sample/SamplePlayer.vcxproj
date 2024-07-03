@@ -317,7 +317,9 @@
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">true</DeploymentContent>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">true</DeploymentContent>
     </None>
-    <AppxManifest Include=".\Package.appxmanifest" />
+    <AppxManifest Include=".\Package.appxmanifest">
+      <SubType>Designer</SubType>
+    </AppxManifest>
     <FXCompile Include="..\common\Shaders\VertexShader.hlsl">
       <EntryPointName>main</EntryPointName>
       <ShaderType>Vertex</ShaderType>
