@@ -21,6 +21,16 @@
 #include <winrt/Windows.Foundation.Metadata.h>
 #include <winrt/Windows.Ui.Popups.h>
 
+#include "SensorVisualizationScenario.h"
+
+#include <fstream>
+
+#include <winrt/Windows.Storage.h>
+#include <winrt/Windows.Storage.Streams.h>
+
+using namespace winrt;
+using namespace winrt::Windows::Storage;
+using namespace winrt::Windows::Storage::Streams;
 using namespace std::chrono_literals;
 
 using namespace winrt::Microsoft::Holographic::AppRemoting;
@@ -33,6 +43,12 @@ using namespace winrt::Windows::Graphics::DirectX::Direct3D11;
 using namespace winrt::Windows::Perception::Spatial;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::UI::Input::Spatial;
+
+
+extern "C"
+HMODULE LoadLibraryA(
+    LPCSTR lpLibFileName
+);
 
 namespace
 {
@@ -124,6 +140,86 @@ winrt::fire_and_forget SamplePlayerMain::ConnectOrListenAfter(std::chrono::syste
     ConnectOrListen();
 }
 
+
+int fileint = 0;
+int cnt = 0;
+
+
+void SaveDataToFile(const BYTE* pData, size_t size)
+{
+    std::ofstream file(fileint++ + ".raw", std::ios::binary);
+    if (file.is_open())
+    {
+        file.write(reinterpret_cast<const char*>(pData), size);
+        file.close();
+    }
+}
+
+winrt::fire_and_forget SaveDataToFile1(const BYTE* pData, size_t size)
+{
+    auto folder = ApplicationData::Current().LocalFolder();
+
+    //StorageFolder picturesLibrary = KnownFolders::PicturesLibrary();
+    std::wstring fileName = std::to_wstring(fileint++) + L".raw"; // 파일 이름 생성
+    StorageFile file = co_await folder.CreateFileAsync(fileName, CreationCollisionOption::ReplaceExisting);
+
+    // 파일에 데이터 쓰기
+    auto stream = co_await file.OpenAsync(FileAccessMode::ReadWrite);
+    auto outputStream = stream.GetOutputStreamAt(0);
+    auto dataWriter = DataWriter(outputStream);
+    dataWriter.WriteBytes(array_view<const uint8_t>(pData, pData + size));
+    co_await dataWriter.StoreAsync();
+    co_await outputStream.FlushAsync();
+
+    stream.Close();     // 스트림 닫기
+    dataWriter.Close(); // 데이터 라이터 닫기
+}
+
+winrt::fire_and_forget SaveDataToFile1()
+{
+    auto folder = ApplicationData::Current().LocalFolder();
+
+    // StorageFolder picturesLibrary = KnownFolders::PicturesLibrary();
+    std::wstring fileName = std::to_wstring(fileint++) + L"fail.raw"; // 파일 이름 생성
+    StorageFile file = co_await folder.CreateFileAsync(fileName, CreationCollisionOption::ReplaceExisting);
+
+    // 파일에 데이터 쓰기
+    auto stream = co_await file.OpenAsync(FileAccessMode::ReadWrite);
+    auto outputStream = stream.GetOutputStreamAt(0);
+    auto dataWriter = DataWriter(outputStream);
+    dataWriter.WriteByte('d');
+    co_await dataWriter.StoreAsync();
+    co_await outputStream.FlushAsync();
+
+    stream.Close();     // 스트림 닫기
+    dataWriter.Close(); // 데이터 라이터 닫기
+}
+
+
+void GetSensorData(IResearchModeSensorFrame* pSensorFrame)
+{
+
+    IResearchModeSensorVLCFrame* pVLCFrame = nullptr;
+    HRESULT hr = pSensorFrame->QueryInterface(IID_PPV_ARGS(&pVLCFrame));
+    if (SUCCEEDED(hr) && pVLCFrame)
+    {
+        // 센서 특정 데이터 처리
+        const BYTE* pImageBuffer = nullptr;
+        size_t bufferSize = 0;
+        pVLCFrame->GetBuffer(&pImageBuffer, &bufferSize);
+
+        // 여기서 파일로 저장
+        SaveDataToFile1(pImageBuffer, bufferSize);
+
+        pVLCFrame->Release();
+    }
+    else
+    {
+        SaveDataToFile1();
+    }
+}
+
+
 HolographicFrame SamplePlayerMain::Update(float deltaTimeInSeconds, const HolographicFrame& prevHolographicFrame)
 {
     SpatialCoordinateSystem focusPointCoordinateSystem = nullptr;
@@ -186,7 +282,17 @@ HolographicFrame SamplePlayerMain::Update(float deltaTimeInSeconds, const Hologr
                 }
             }
         }
+        if (connected && cnt++ == 1000)
+        {
+            cnt = 0;
+            IResearchModeSensorFrame* pSensorFrame = nullptr;
+            ResearchModeSensorTimestamp timeStamp;
 
+            winrt::check_hresult(m_pLTSensor->GetNextBuffer(&pSensorFrame));
+            pSensorFrame->GetTimeStamp(&timeStamp);
+            GetSensorData(pSensorFrame);
+
+        }
         m_statusDisplay->SetImageEnabled(!connected);
         m_statusDisplay->Update(deltaTimeInSeconds);
         m_errorHelper.Update(deltaTimeInSeconds, [this]() { UpdateStatusDisplay(); });
@@ -395,6 +501,46 @@ IFrameworkView SamplePlayerMain::CreateView()
 
 #pragma region IFrameworkView methods
 
+static ResearchModeSensorConsent camAccessCheck;
+static HANDLE camConsentGiven;
+static ResearchModeSensorConsent imuAccessCheck;
+static HANDLE imuConsentGiven;
+
+void CamAccessOnComplete(ResearchModeSensorConsent consent)
+{
+    camAccessCheck = consent;
+    SetEvent(camConsentGiven);
+}
+
+void ImuAccessOnComplete(ResearchModeSensorConsent consent)
+{
+    imuAccessCheck = consent;
+    SetEvent(imuConsentGiven);
+}
+
+void SamplePlayerMain::test()
+{
+    while (true) // 무한 루프로 지속적 실행
+    {
+        IResearchModeSensorFrame* pSensorFrame = nullptr;
+        ResearchModeSensorTimestamp timeStamp;
+
+        winrt::check_hresult(m_pLTSensor->GetNextBuffer(&pSensorFrame));
+
+        if (pSensorFrame != nullptr)
+        {
+            pSensorFrame->GetTimeStamp(&timeStamp);
+            // StatusDisplay::Line lines[] = {StatusDisplay::Line{L"Not Nullptr", StatusDisplay::Small, StatusDisplay::Yellow, 1.0f}};
+        }
+        else
+        {
+
+            // StatusDisplay::Line lines[] = {StatusDisplay::Line{L"Nullptr", StatusDisplay::Small, StatusDisplay::Yellow, 1.0f}};
+        }
+
+        std::this_thread::sleep_for(std::chrono::seconds(1));
+    }
+}
 void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
 {
     // Create the player context
@@ -406,6 +552,88 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
     {
         // 홀로그래픽 디스플레이 장치로 스트리밍하는 기술
         m_playerContext = PlayerContext::Create();
+
+        HRESULT hr = S_OK;
+        size_t sensorCount = 0;
+        camConsentGiven = CreateEvent(nullptr, true, false, nullptr);
+        imuConsentGiven = CreateEvent(nullptr, true, false, nullptr);
+
+        HMODULE hrResearchMode = LoadLibraryA("ResearchModeAPI");
+        if (hrResearchMode)
+        {
+            typedef HRESULT(__cdecl * PFN_CREATEPROVIDER)(IResearchModeSensorDevice * *ppSensorDevice);
+            PFN_CREATEPROVIDER pfnCreate =
+                reinterpret_cast<PFN_CREATEPROVIDER>(GetProcAddress(hrResearchMode, "CreateResearchModeSensorDevice"));
+            if (pfnCreate)
+            {
+                winrt::check_hresult(pfnCreate(&m_pSensorDevice));
+            }
+            else
+            {
+                winrt::check_hresult(E_INVALIDARG);
+            }
+        }
+
+        winrt::check_hresult(m_pSensorDevice->QueryInterface(IID_PPV_ARGS(&m_pSensorDeviceConsent)));
+        winrt::check_hresult(m_pSensorDeviceConsent->RequestCamAccessAsync(CamAccessOnComplete));
+        winrt::check_hresult(m_pSensorDeviceConsent->RequestIMUAccessAsync(ImuAccessOnComplete));
+
+        m_pSensorDevice->DisableEyeSelection();
+
+        winrt::check_hresult(m_pSensorDevice->GetSensorCount(&sensorCount));
+        m_sensorDescriptors.resize(sensorCount);
+
+        winrt::check_hresult(m_pSensorDevice->GetSensorDescriptors(m_sensorDescriptors.data(), m_sensorDescriptors.size(), &sensorCount));
+
+        for (auto sensorDescriptor : m_sensorDescriptors)
+        {
+            IResearchModeSensor* pSensor = nullptr;
+
+            if (sensorDescriptor.sensorType == LEFT_FRONT)
+            {
+                winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pLFCameraSensor));
+            }
+
+            if (sensorDescriptor.sensorType == RIGHT_FRONT)
+            {
+                winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pRFCameraSensor));
+
+                int a = 3;
+            }
+
+// Long throw and AHAT modes can not be used at the same time.
+#define DEPTH_USE_LONG_THROW
+
+#ifdef DEPTH_USE_LONG_THROW
+            if (sensorDescriptor.sensorType == DEPTH_LONG_THROW)
+            {
+                winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pLTSensor));
+                m_pSensorDevice->AddRef();
+
+                winrt::check_hresult(m_pLTSensor->OpenStream());
+
+                //std::thread t1(&SamplePlayerMain::test, this);
+
+            }
+#else
+            if (sensorDescriptor.sensorType == DEPTH_AHAT)
+            {
+                winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pAHATSensor));
+            }
+#endif
+            if (sensorDescriptor.sensorType == IMU_ACCEL)
+            {
+                winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pAccelSensor));
+            }
+            if (sensorDescriptor.sensorType == IMU_GYRO)
+            {
+                winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pGyroSensor));
+            }
+            if (sensorDescriptor.sensorType == IMU_MAG)
+            {
+                winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pMagSensor));
+            }
+        }
     }
     catch (winrt::hresult_error)
     {
@@ -477,6 +705,7 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
     }
 }
 
+
 void SamplePlayerMain::SetWindow(const CoreWindow& window)
 {
     m_windowVisible = window.Visible();
@@ -544,6 +773,8 @@ void SamplePlayerMain::Load(const winrt::hstring& entryPoint)
 {
 }
 
+
+
 void SamplePlayerMain::Run()
 {
     using Clock = std::chrono::high_resolution_clock;
@@ -605,6 +836,7 @@ void SamplePlayerMain::Run()
             CoreWindow::GetForCurrentThread().Dispatcher().ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
 
             HolographicFrame holographicFrame = Update(deltaTimeInSeconds, prevHolographicFrame);
+
             Render(holographicFrame);
             prevHolographicFrame = holographicFrame;
         }
