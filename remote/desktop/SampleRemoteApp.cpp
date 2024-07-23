@@ -833,10 +833,10 @@ void SampleRemoteApp::ConnectOrListen()
 {
     std::lock_guard remoteContextLock(m_remoteContextAccess);
 
-    if (!m_remoteContext || m_remoteContext.ConnectionState() != ConnectionState::Disconnected)
-    {
-        return;
-    }
+    //if (!m_remoteContext || m_remoteContext.ConnectionState() != ConnectionState::Disconnected)
+    //{
+    //    return;
+    //}
 
     // Try to establish a connection.
     try

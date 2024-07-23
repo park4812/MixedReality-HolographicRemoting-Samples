@@ -38,7 +38,6 @@ namespace sample {
     void ParseCommandLine(sample::AppOptions& options) {
         int numArgs = __argc;
         char** argList = __argv;
-
         for (int i = 1; i < numArgs; ++i) {
             if (strlen(argList[i]) == 0) {
                 continue;

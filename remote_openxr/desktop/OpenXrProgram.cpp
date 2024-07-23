@@ -346,7 +346,6 @@ namespace {
             if (!m_usingRemotingRuntime) {
                 return;
             }
-
             XrRemotingConnectionStateMSFT connectionState;
             CHECK_XRCMD(xrRemotingGetConnectionStateMSFT(m_instance.Get(), m_systemId, &connectionState, nullptr));
             if (connectionState != XR_REMOTING_CONNECTION_STATE_DISCONNECTED_MSFT) {
@@ -354,6 +353,7 @@ namespace {
             }
 
             // Apply remote context properties while disconnected.
+            // 연결이 끊긴 상태에서 원격 컨텍스트 속성 적용하기
             {
                 XrRemotingRemoteContextPropertiesMSFT contextProperties;
                 contextProperties =
@@ -362,12 +362,12 @@ namespace {
                 contextProperties.maxBitrateKbps = 20000;
                 contextProperties.videoCodec = XR_REMOTING_VIDEO_CODEC_H265_MSFT;
 
-                contextProperties.depthBufferStreamResolution = XR_REMOTING_DEPTH_BUFFER_STREAM_RESOLUTION_HALF_MSFT;
+                contextProperties.depthBufferStreamResolution = XR_REMOTING_DEPTH_BUFFER_STREAM_RESOLUTION_FULL_MSFT;
                 CHECK_XRCMD(xrRemotingSetContextPropertiesMSFT(m_instance.Get(), m_systemId, &contextProperties));
             }
 
             if (m_options.listen) {
-                if (m_options.secureConnection) {
+                if (m_options.secureConnection ) {
                     XrRemotingSecureConnectionServerCallbacksMSFT serverCallbacks{
                         static_cast<XrStructureType>(XR_TYPE_REMOTING_SECURE_CONNECTION_SERVER_CALLBACKS_MSFT)};
                     serverCallbacks.context = &m_secureConnectionCallbacks;
