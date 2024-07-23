@@ -114,21 +114,20 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d2d1.lib; d3d11.lib; dxgi.lib; dwrite.lib; windowscodecs.lib; Kernel32.lib;onecore.lib; %(AdditionalDependencies);</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\amd64; $(VCInstallDir)\lib\amd64</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:ARM64 /PDBALTPATH:$(TargetName).pdb</AdditionalOptions>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>mincore.lib;ole32.lib;comsuppwd.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>.\bin\Debug\SamplePlayer.lib</ImportLibrary>
       <OptimizeReferences>false</OptimizeReferences>
       <ProgramDataBaseFile>.\bin\Debug\SamplePlayer.pdb</ProgramDataBaseFile>
       <SubSystem>Windows</SubSystem>
     </Link>
     <ProjectReference>
-      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+      <LinkLibraryDependencies>true</LinkLibraryDependencies>
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|ARM64'">
@@ -166,14 +165,13 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>
-      </AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;dwrite.lib;windowscodecs.lib;Kernel32.lib;onecore.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\amd64; $(VCInstallDir)\lib\amd64</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:ARM64 /PDBALTPATH:$(TargetName).pdb</AdditionalOptions>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateWindowsMetadata>false</GenerateWindowsMetadata>
-      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <IgnoreSpecificDefaultLibraries>mincore.lib;ole32.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ImportLibrary>.\bin\RelWithDebInfo\SamplePlayer.lib</ImportLibrary>
       <OptimizeReferences>false</OptimizeReferences>
       <ProgramDataBaseFile>.\bin\RelWithDebInfo\SamplePlayer.pdb</ProgramDataBaseFile>
@@ -236,6 +234,20 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Common\CameraResources.cpp" />
+    <ClCompile Include="Common\DeviceResources.cpp" />
+    <ClCompile Include="Content\AccelRenderer.cpp" />
+    <ClCompile Include="Content\GyroRenderer.cpp" />
+    <ClCompile Include="Content\MagRenderer.cpp" />
+    <ClCompile Include="Content\ModelRenderer.cpp" />
+    <ClCompile Include="Content\SlateCameraRenderer.cpp" />
+    <ClCompile Include="Content\SpatialInputHandler.cpp" />
+    <ClCompile Include="Content\VectorModel.cpp" />
+    <ClCompile Include="Content\XAxisModel.cpp" />
+    <ClCompile Include="Content\XYZAxisModel.cpp" />
+    <ClCompile Include="Content\YAxisModel.cpp" />
+    <ClCompile Include="Content\ZAxisModel.cpp" />
+    <ClCompile Include="Texture2D.cpp" />
     <ClInclude Include=".\pch.h" />
     <ClCompile Include=".\pch.cpp" />
     <ClInclude Include=".\SamplePlayerMain.h" />
@@ -263,6 +275,24 @@
     <ClInclude Include="..\..\common\ShaderStructures.h" />
     <ClInclude Include="..\common\Content\StatusDisplay.h" />
     <ClCompile Include="..\common\Content\StatusDisplay.cpp" />
+    <ClInclude Include="Common\CameraResources.h" />
+    <ClInclude Include="Common\DeviceResources.h" />
+    <ClInclude Include="Common\DirectXHelper.h" />
+    <ClInclude Include="Common\StepTimer.h" />
+    <ClInclude Include="Content\AccelRenderer.h" />
+    <ClInclude Include="Content\GyroRenderer.h" />
+    <ClInclude Include="Content\MagRenderer.h" />
+    <ClInclude Include="Content\ModelRenderer.h" />
+    <ClInclude Include="Content\ShaderStructures.h" />
+    <ClInclude Include="Content\SlateCameraRenderer.h" />
+    <ClInclude Include="Content\SpatialInputHandler.h" />
+    <ClInclude Include="Content\VectorModel.h" />
+    <ClInclude Include="Content\XAxisModel.h" />
+    <ClInclude Include="Content\XYZAxisModel.h" />
+    <ClInclude Include="Content\YAxisModel.h" />
+    <ClInclude Include="Content\ZAxisModel.h" />
+    <ClInclude Include="researchmode\ResearchModeApi.h" />
+    <ClInclude Include="Texture2D.h" />
     <None Include=".\Assets\RemotingLogo.dds">
       <Link>.\%(FileName)%(Extension)</Link>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</DeploymentContent>

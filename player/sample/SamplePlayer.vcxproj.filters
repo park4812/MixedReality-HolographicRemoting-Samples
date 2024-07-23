@@ -1,0 +1,163 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <FXCompile Include="..\common\Shaders\VertexShader.hlsl" />
+    <FXCompile Include="..\common\Shaders\VPRTVertexShader.hlsl" />
+    <FXCompile Include="..\..\common\shaders\SimpleColor_VertexShader.hlsl" />
+    <FXCompile Include="..\..\common\shaders\SimpleColor_VertexShaderVprt.hlsl" />
+    <FXCompile Include="..\common\Shaders\PixelShader.hlsl" />
+    <FXCompile Include="..\..\common\shaders\SimpleColor_PixelShader.hlsl" />
+    <FXCompile Include="..\common\Shaders\GeometryShader.hlsl" />
+    <FXCompile Include="..\..\common\shaders\SimpleColor_GeometryShader.hlsl" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include=".\pch.cpp" />
+    <ClCompile Include=".\SamplePlayerMain.cpp" />
+    <ClCompile Include="..\common\IpAddressUpdaterWindows.cpp" />
+    <ClCompile Include="..\common\PlayerFrameStatisticsHelper.cpp" />
+    <ClCompile Include="..\common\PlayerUtil.cpp" />
+    <ClCompile Include="..\..\common\CameraResourcesD3D11Holographic.cpp" />
+    <ClCompile Include="..\..\common\DeviceResourcesD3D11.cpp" />
+    <ClCompile Include="..\..\common\DeviceResourcesD3D11Holographic.cpp" />
+    <ClCompile Include="..\..\common\SimpleCubeRenderer.cpp" />
+    <ClCompile Include="..\common\Content\DDSTextureLoader.cpp" />
+    <ClCompile Include="..\common\Content\ErrorHelper.cpp" />
+    <ClCompile Include="..\common\Content\StatusDisplay.cpp" />
+    <ClCompile Include="Content\ModelRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Texture2D.cpp" />
+    <ClCompile Include="Common\DeviceResources.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Common\CameraResources.cpp">
+      <Filter>Common</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\SlateCameraRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\SpatialInputHandler.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\VectorModel.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\XAxisModel.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\XYZAxisModel.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\YAxisModel.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\ZAxisModel.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\AccelRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\GyroRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+    <ClCompile Include="Content\MagRenderer.cpp">
+      <Filter>Content</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include=".\pch.h" />
+    <ClInclude Include=".\SamplePlayerMain.h" />
+    <ClInclude Include="..\common\IpAddressUpdater.h" />
+    <ClInclude Include="..\common\PlayerFrameStatisticsHelper.h" />
+    <ClInclude Include="..\common\PlayerUtil.h" />
+    <ClInclude Include="..\..\common\CameraResourcesD3D11Holographic.h" />
+    <ClInclude Include="..\..\common\DeviceResourcesD3D11.h" />
+    <ClInclude Include="..\..\common\DeviceResourcesD3D11Holographic.h" />
+    <ClInclude Include="..\..\common\DirectXSdkLayerSupport.h" />
+    <ClInclude Include="..\..\common\SimpleColor_ShaderStructures.h" />
+    <ClInclude Include="..\..\common\SimpleCubeRenderer.h" />
+    <ClInclude Include="..\common\Content\DDSTextureLoader.h" />
+    <ClInclude Include="..\common\Content\ErrorHelper.h" />
+    <ClInclude Include="..\..\common\ShaderStructures.h" />
+    <ClInclude Include="..\common\Content\StatusDisplay.h" />
+    <ClInclude Include="Content\ModelRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Texture2D.h" />
+    <ClInclude Include="Common\CameraResources.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DeviceResources.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\DirectXHelper.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Common\StepTimer.h">
+      <Filter>Common</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\MagRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\ShaderStructures.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\SlateCameraRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\SpatialInputHandler.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\VectorModel.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\XAxisModel.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\XYZAxisModel.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\YAxisModel.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\ZAxisModel.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\AccelRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="Content\GyroRenderer.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+    <ClInclude Include="researchmode\ResearchModeApi.h">
+      <Filter>Content</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include=".\Assets\LockScreenLogo.scale-200.png" />
+    <Image Include=".\Assets\SplashScreen.scale-200.png" />
+    <Image Include=".\Assets\Square44x44Logo.scale-200.png" />
+    <Image Include=".\Assets\Square44x44Logo.targetsize-24_altform-unplated.png" />
+    <Image Include=".\Assets\Square150x150Logo.scale-200.png" />
+    <Image Include=".\Assets\StoreLogo.png" />
+    <Image Include=".\Assets\Wide310x150Logo.scale-200.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <AppxManifest Include=".\Package.appxmanifest" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include=".\Assets\RemotingLogo.dds" />
+    <None Include=".\Assets\MixedRealityModel.glb" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Content">
+      <UniqueIdentifier>{36aea9cd-2764-4832-bd9d-3793df696bb6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Common">
+      <UniqueIdentifier>{99ffc72f-fb17-4d95-8d27-e6cd8bd39a9b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Content\Shaders">
+      <UniqueIdentifier>{dab477ef-9227-4c42-ac92-a75072c11b70}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
