@@ -63,6 +63,8 @@
     <ClCompile Include="Content\MagRenderer.cpp">
       <Filter>Content</Filter>
     </ClCompile>
+    <ClCompile Include="BasicHologramMain.cpp" />
+    <ClCompile Include="SensorVisualizationScenario.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\pch.h" />
@@ -132,6 +134,8 @@
     <ClInclude Include="researchmode\ResearchModeApi.h">
       <Filter>Content</Filter>
     </ClInclude>
+    <ClInclude Include="BasicHologramMain.h" />
+    <ClInclude Include="SensorVisualizationScenario.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include=".\Assets\LockScreenLogo.scale-200.png" />

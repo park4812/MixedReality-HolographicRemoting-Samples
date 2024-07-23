@@ -234,6 +234,7 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="BasicHologramMain.cpp" />
     <ClCompile Include="Common\CameraResources.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
     <ClCompile Include="Content\AccelRenderer.cpp" />
@@ -247,6 +248,7 @@
     <ClCompile Include="Content\XYZAxisModel.cpp" />
     <ClCompile Include="Content\YAxisModel.cpp" />
     <ClCompile Include="Content\ZAxisModel.cpp" />
+    <ClCompile Include="SensorVisualizationScenario.cpp" />
     <ClCompile Include="Texture2D.cpp" />
     <ClInclude Include=".\pch.h" />
     <ClCompile Include=".\pch.cpp" />
@@ -275,6 +277,7 @@
     <ClInclude Include="..\..\common\ShaderStructures.h" />
     <ClInclude Include="..\common\Content\StatusDisplay.h" />
     <ClCompile Include="..\common\Content\StatusDisplay.cpp" />
+    <ClInclude Include="BasicHologramMain.h" />
     <ClInclude Include="Common\CameraResources.h" />
     <ClInclude Include="Common\DeviceResources.h" />
     <ClInclude Include="Common\DirectXHelper.h" />
@@ -292,6 +295,7 @@
     <ClInclude Include="Content\YAxisModel.h" />
     <ClInclude Include="Content\ZAxisModel.h" />
     <ClInclude Include="researchmode\ResearchModeApi.h" />
+    <ClInclude Include="SensorVisualizationScenario.h" />
     <ClInclude Include="Texture2D.h" />
     <None Include=".\Assets\RemotingLogo.dds">
       <Link>.\%(FileName)%(Extension)</Link>
