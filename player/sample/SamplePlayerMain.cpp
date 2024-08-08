@@ -28,6 +28,12 @@
 #include <winrt/Windows.Storage.h>
 #include <winrt/Windows.Storage.Streams.h>
 
+#include <VuforiaEngine/VuforiaEngine.h>
+#include <VuforiaEngine/Engine/Engine.h>
+#include <VuforiaEngine/Engine/UWP/PlatformConfig_UWP.h>
+
+#include <winrt/Windows.UI.Core.h>
+
 using namespace winrt;
 using namespace winrt::Windows::Storage;
 using namespace winrt::Windows::Storage::Streams;
@@ -53,7 +59,22 @@ HMODULE LoadLibraryA(
 namespace
 {
     constexpr int64_t s_loadingDotsMaxCount = 3;
+    // clang-format off
+    constexpr char licenseKey[] = "AVHCLvP/////AAABmWwC7IbDoUN6mYq1HaXv5GwPBwAYQsVp8szql79Z8g9Lm3U+mmWO5I3tpb65cc5lGs+7kndf3N/UGIzXLSIH6G1LfAelOWeZBhRS7bmdwfoe5Qe4IJa3Zb8Y4tRJyBknHh//vPjyTfh6V5B1hwKH8iB2JNULWVLvwjLDAm3C57BTcs5oHGo3+7Z8zma8RaE4lycngdPmLgSLQjX8s0rOGMr8xthCP7Th8hSK+D2kzVdJtZCXN2/UgGOn/kFW5r/w+vZIgnpwq5rYtGOlawAq2lBGFQyHKYUabTnqUipHMvUzNe17Z3yQlWvLWoy6VhBlyiPQTSmv8oOzaKC44Qx57Ai49+ou0f6Kcgfw2DrGvISC";
+    // clang-format on
+
+    constexpr float NEAR_PLANE = 0.01f;
+    constexpr float FAR_PLANE = 5.f;
 }
+
+/// Helper macro to check results of Vuforia Engine calls that are expected to succeed
+#define REQUIRE_SUCCESS(command)                                                                                                           \
+    {                                                                                                                                      \
+        auto vu_result_appsupport_ = command;                                                                                              \
+        (void)vu_result_appsupport_;                                                                                                       \
+        assert(vu_result_appsupport_ == VU_SUCCESS);                                                                                       \
+    }
+
 
 SamplePlayerMain::SamplePlayerMain()
 {
@@ -62,6 +83,7 @@ SamplePlayerMain::SamplePlayerMain()
 
     m_ipAddressUpdater = CreateIpAddressUpdater();
 }
+
 SamplePlayerMain::~SamplePlayerMain()
 {
     Uninitialize();
@@ -175,6 +197,31 @@ winrt::fire_and_forget SaveDataToFile1(const BYTE* pData, size_t size)
     dataWriter.Close(); // 데이터 라이터 닫기
 }
 
+
+winrt::fire_and_forget SaveDataToFile1(const UINT16* pData, size_t size)
+{
+    auto folder = ApplicationData::Current().LocalFolder();
+    std::wstring fileName = std::to_wstring(fileint++) + L"1.raw"; // 파일 이름 생성
+    StorageFile file = co_await folder.CreateFileAsync(fileName, CreationCollisionOption::ReplaceExisting);
+
+    // 파일에 데이터 쓰기
+    auto stream = co_await file.OpenAsync(FileAccessMode::ReadWrite);
+    auto outputStream = stream.GetOutputStreamAt(0);
+    auto dataWriter = DataWriter(outputStream);
+
+    // UINT16 데이터를 byte 배열로 해석하여 쓰기
+    // pData 포인터를 byte 배열로 취급하고 전체 크기를 byte로 계산합니다.
+    dataWriter.WriteBytes(array_view<const uint8_t>(
+        reinterpret_cast<const uint8_t*>(pData), reinterpret_cast<const uint8_t*>(pData) + (size * sizeof(UINT16))));
+
+    co_await dataWriter.StoreAsync();
+    co_await outputStream.FlushAsync();
+
+    stream.Close();     // 스트림 닫기
+    dataWriter.Close(); // 데이터 라이터 닫기
+}
+
+
 winrt::fire_and_forget SaveDataToFile1()
 {
     auto folder = ApplicationData::Current().LocalFolder();
@@ -196,16 +243,54 @@ winrt::fire_and_forget SaveDataToFile1()
 }
 
 
+winrt::fire_and_forget SaveDataToFile2()
+{
+    auto folder = ApplicationData::Current().LocalFolder();
+
+    // StorageFolder picturesLibrary = KnownFolders::PicturesLibrary();
+    std::wstring fileName = L"run.raw"; // 파일 이름 생성
+    StorageFile file = co_await folder.CreateFileAsync(fileName, CreationCollisionOption::ReplaceExisting);
+
+    // 파일에 데이터 쓰기
+    auto stream = co_await file.OpenAsync(FileAccessMode::ReadWrite);
+    auto outputStream = stream.GetOutputStreamAt(0);
+    auto dataWriter = DataWriter(outputStream);
+    dataWriter.WriteByte('r');
+    co_await dataWriter.StoreAsync();
+    co_await outputStream.FlushAsync();
+
+    stream.Close();     // 스트림 닫기
+    dataWriter.Close(); // 데이터 라이터 닫기
+}
+
 void GetSensorData(IResearchModeSensorFrame* pSensorFrame)
 {
 
     IResearchModeSensorVLCFrame* pVLCFrame = nullptr;
+    IResearchModeSensorDepthFrame* pDepthFrame = nullptr;
+
+
     HRESULT hr = pSensorFrame->QueryInterface(IID_PPV_ARGS(&pVLCFrame));
-    if (SUCCEEDED(hr) && pVLCFrame)
+
+    if (FAILED(hr))
+    {
+        const UINT16* pIntBuffer = nullptr;
+        size_t bufferSize = 0;
+
+        hr = pSensorFrame->QueryInterface(IID_PPV_ARGS(&pDepthFrame));
+
+        pDepthFrame->GetBuffer(&pIntBuffer, &bufferSize);
+
+        SaveDataToFile1(pIntBuffer, bufferSize);
+
+        pDepthFrame->Release();
+    }
+    else if (SUCCEEDED(hr) && pVLCFrame)
     {
         // 센서 특정 데이터 처리
         const BYTE* pImageBuffer = nullptr;
         size_t bufferSize = 0;
+
         pVLCFrame->GetBuffer(&pImageBuffer, &bufferSize);
 
         // 여기서 파일로 저장
@@ -612,8 +697,7 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
 
                 winrt::check_hresult(m_pLTSensor->OpenStream());
 
-                //std::thread t1(&SamplePlayerMain::test, this);
-
+                SaveDataToFile2();
             }
 #else
             if (sensorDescriptor.sensorType == DEPTH_AHAT)
@@ -769,8 +853,82 @@ void SamplePlayerMain::SetWindow(const CoreWindow& window)
 #endif
 }
 
+
+void SamplePlayerMain::InitDone()
+{
+    mVuforiaStarted = mController.startAR();
+    if (mVuforiaStarted)
+    {
+        // Only reset this flag if startAR succeeded to ensure we deinit
+        // Vuforia when navigating away from this page when start failed
+        mVuforiaInitializing = false;
+
+        // Change application state to running
+        mAppShouldBeRunning = true;
+        mLifecycleOperation = concurrency::task_from_result(true);
+    }
+
+    // Switch to UI thread to update controls
+    //co_await winrt::resume_foreground(Dispatcher());
+    //InitProgressRing().Visibility(Visibility::Collapsed);
+    //BackButton().IsEnabled(true);
+}
+
+
 void SamplePlayerMain::Load(const winrt::hstring& entryPoint)
 {
+    /*
+    InitConfig config;
+    config.vbRenderBackend = VU_RENDER_VB_BACKEND_DX11;
+    config.initDoneCallback = std::bind(&SamplePlayerMain::InitDone, this);
+
+    // Bail out early if an engine instance has already been created (apps must call deinitEngine first before calling reinitialization)
+    if (mEngine != nullptr)
+    {
+        return;
+    }
+
+    // Create engine configuration data structure
+    VuEngineConfigSet* configSet = nullptr;
+    REQUIRE_SUCCESS(vuEngineConfigSetCreate(&configSet));
+
+    // Add license key to engine configuration
+    auto licenseConfig = vuLicenseConfigDefault();
+    licenseConfig.key = licenseKey;
+    if (vuEngineConfigSetAddLicenseConfig(configSet, &licenseConfig) != VU_SUCCESS)
+    {
+        // Clean up before exiting
+        REQUIRE_SUCCESS(vuEngineConfigSetDestroy(configSet));
+
+        return;
+    }
+
+    // Create default render configuration (may be overwritten by platform-specific settings)
+    // The default selects the platform preferred rendering backend
+    auto renderConfig = vuRenderConfigDefault();
+    renderConfig.vbRenderBackend = mVbRenderBackend;
+
+        // Add platform-specific engine configuration
+    VuResult platformConfigResult = VU_SUCCESS;
+
+    // Set display orientation in platform-specific configuration
+    auto vuPlatformConfig_UWP = vuPlatformUWPConfigDefault();
+    vuPlatformConfig_UWP.displayOrientation = appData;
+
+    // Add platform-specific configuration to engine configuration set
+    platformConfigResult = vuEngineConfigSetAddPlatformUWPConfig(configSet, &vuPlatformConfig_UWP);
+
+    // Check platform configuration result
+    if (platformConfigResult != VU_SUCCESS)
+    {
+        // Clean up before exiting
+        REQUIRE_SUCCESS(vuEngineConfigSetDestroy(configSet));
+
+        //LOG("Failed to init Vuforia, could not apply platform-specific configuration");
+        //mErrorMessageCallback("Vuforia failed to initialize, could not apply platform-specific configuration");
+        return;
+    }
+    */
 }
 
 
@@ -785,6 +943,8 @@ void SamplePlayerMain::Run()
     TimePoint timeLastUpdate = clock.now();
 
     HolographicFrame prevHolographicFrame = nullptr;
+
+
     while (!m_windowClosed)
     {
         TimePoint timeCurrUpdate = clock.now();

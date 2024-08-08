@@ -65,6 +65,9 @@
     </ClCompile>
     <ClCompile Include="BasicHologramMain.cpp" />
     <ClCompile Include="SensorVisualizationScenario.cpp" />
+    <ClCompile Include="CrossPlatform\AppController.cpp">
+      <Filter>CrossPlatform</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\pch.h" />
@@ -136,6 +139,12 @@
     </ClInclude>
     <ClInclude Include="BasicHologramMain.h" />
     <ClInclude Include="SensorVisualizationScenario.h" />
+    <ClInclude Include="CrossPlatform\AppController.h">
+      <Filter>CrossPlatform</Filter>
+    </ClInclude>
+    <ClInclude Include="CrossPlatform\Log.h">
+      <Filter>CrossPlatform</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Image Include=".\Assets\LockScreenLogo.scale-200.png" />
@@ -152,6 +161,7 @@
   <ItemGroup>
     <None Include=".\Assets\RemotingLogo.dds" />
     <None Include=".\Assets\MixedRealityModel.glb" />
+    <None Include="bin\Debug\VuforiaEngine.dll" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Content">
@@ -162,6 +172,9 @@
     </Filter>
     <Filter Include="Content\Shaders">
       <UniqueIdentifier>{dab477ef-9227-4c42-ac92-a75072c11b70}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="CrossPlatform">
+      <UniqueIdentifier>{ad494f8c-d84f-4a7a-ba64-08ec11a0fd2a}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

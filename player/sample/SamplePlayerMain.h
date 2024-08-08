@@ -21,7 +21,7 @@
 #include "../common/PlayerFrameStatisticsHelper.h"
 
 #include <winrt/Microsoft.Holographic.AppRemoting.h>
-
+#include <CrossPlatform/AppController.h>
 #include <chrono>
 
 #include <DeviceResourcesD3D11Holographic.h>
@@ -38,9 +38,31 @@ class SamplePlayerMain : public winrt::implements<
                          public DXHelper::IDeviceNotify
 {
 public:
+    /// Struct to group initialization parameters passed to initAR
+        // Constants
+    static constexpr int IMAGE_TARGET_ID = 0;
+    static constexpr int MODEL_TARGET_ID = 1;
+
+    // Type definitions
+    using ErrorMessageCallback = std::function<void(const char* errorString)>;
+    using VuforiaEngineErrorCallback = std::function<void(VuErrorCode errorCode)>;
+    using InitDoneCallback = std::function<void()>;
+
+    class InitConfig
+    {
+    public:
+        VuRenderVBBackendType vbRenderBackend{VU_RENDER_VB_BACKEND_DEFAULT};
+        void* appData{nullptr};
+        ErrorMessageCallback errorMessageCallback{};
+        VuforiaEngineErrorCallback vuforiaEngineErrorCallback{};
+        InitDoneCallback initDoneCallback{};
+    };
+
     SamplePlayerMain();
     ~SamplePlayerMain();
     void test();
+
+    void InitDone();
 
     // Try to (re-)connect to or listen on the hostname/port, that was set during activation of the app.
     void ConnectOrListen();
@@ -118,6 +140,17 @@ private:
     void OnWindowClosed(const winrt::Windows::UI::Core::CoreWindow& sender, const winrt::Windows::UI::Core::CoreWindowEventArgs& args);
 
 private:
+    void* appData{nullptr};
+    VuEngine* mEngine{nullptr};
+
+    AppController mController;
+    bool mVuforiaInitializing = false;
+    std::atomic<bool> mVuforiaStarted = false;
+    std::atomic<bool> mAppShouldBeRunning{false};
+    concurrency::task<bool> mLifecycleOperation = concurrency::task_from_result(false);
+
+    VuRenderVBBackendType mVbRenderBackend = VuRenderVBBackendType::VU_RENDER_VB_BACKEND_DEFAULT;
+
     std::unique_ptr<BasicHologram::BasicHologramMain> m_main;
     std::shared_ptr<DX::DeviceResources> m_deviceResources1;
     winrt::Windows::Graphics::Holographic::HolographicSpace m_holographicSpace = nullptr;
