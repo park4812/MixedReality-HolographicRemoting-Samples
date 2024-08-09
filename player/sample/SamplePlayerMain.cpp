@@ -18,8 +18,13 @@
 
 #include <sstream>
 
+
 #include <winrt/Windows.Foundation.Metadata.h>
 #include <winrt/Windows.Ui.Popups.h>
+
+//#include <winrt/Windows.Graphics.Display.h>
+//#include <winrt/Windows.UI.Xaml.h>
+//#include <winrt/Windows.UI.Core.h>
 
 using namespace std::chrono_literals;
 
@@ -38,6 +43,8 @@ namespace
 {
     constexpr int64_t s_loadingDotsMaxCount = 3;
 }
+
+extern "C" HMODULE LoadLibraryA(LPCSTR lpLibFileName);
 
 SamplePlayerMain::SamplePlayerMain()
 {
@@ -395,6 +402,22 @@ IFrameworkView SamplePlayerMain::CreateView()
 
 #pragma region IFrameworkView methods
 
+void SamplePlayerMain::InitDone()
+{
+    mVuforiaStarted = mController.startAR();
+    if (mVuforiaStarted)
+    {
+        // Only reset this flag if startAR succeeded to ensure we deinit
+        // Vuforia when navigating away from this page when start failed
+        mVuforiaInitializing = false;
+
+        // Change application state to running
+        mAppShouldBeRunning = true;
+        mLifecycleOperation = concurrency::task_from_result(true);
+    }
+
+}
+
 void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
 {
     // Create the player context
@@ -406,6 +429,14 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
     {
         // 홀로그래픽 디스플레이 장치로 스트리밍하는 기술
         m_playerContext = PlayerContext::Create();
+
+        AppController::InitConfig config;
+        config.vbRenderBackend = VU_RENDER_VB_BACKEND_DX11;
+        config.initDoneCallback = std::bind(&SamplePlayerMain::InitDone, this);
+
+
+        mVuforiaInitializing = true;
+        mController.initAR(config, 0);
     }
     catch (winrt::hresult_error)
     {
@@ -475,6 +506,10 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
             m_spatialLocator.CreateStationaryFrameOfReferenceAtCurrentLocation(float3(0.5f, 0.0f, -2.0f), quaternion(0, 0, 0, 1), 0.0);
 #endif
     }
+
+
+
+    // mVuforiaStarted = mController.startAR();
 }
 
 void SamplePlayerMain::SetWindow(const CoreWindow& window)
@@ -539,6 +574,7 @@ void SamplePlayerMain::SetWindow(const CoreWindow& window)
     }
 #endif
 }
+
 
 void SamplePlayerMain::Load(const winrt::hstring& entryPoint)
 {

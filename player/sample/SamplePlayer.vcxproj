@@ -55,7 +55,8 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
+    <IncludePath>H:\vuforia-sdk-uwp-10-25-4\build\bin\ARM64;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <PropertyGroup>
     <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
@@ -80,7 +81,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
     <ClCompile>
-      <AdditionalIncludeDirectories>.;..\common;..\..\common;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.;..\common;..\..\common;H:\vuforia-sdk-uwp-10-25-4\build\include;..\CrossPlatform;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <AdditionalOptions>%(AdditionalOptions) /await</AdditionalOptions>
       <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
       <CompileAsWinRT>false</CompileAsWinRT>
@@ -114,8 +115,8 @@
       <ProxyFileName>%(Filename)_p.c</ProxyFileName>
     </Midl>
     <Link>
-      <AdditionalDependencies>d2d1.lib; d3d11.lib; dxgi.lib; dwrite.lib; windowscodecs.lib; Kernel32.lib;onecore.lib; %(AdditionalDependencies);</AdditionalDependencies>
-      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories); $(VCInstallDir)\lib\store\amd64; $(VCInstallDir)\lib\amd64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>d2d1.lib;d3d11.lib;dxgi.lib;dwrite.lib;windowscodecs.lib;Kernel32.lib;onecore.lib;VuforiaEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>%(AdditionalLibraryDirectories);$(VCInstallDir)\lib\store\amd64;$(VCInstallDir)\lib\amd64;H:\vuforia-sdk-uwp-10-25-4\build\bin\ARM64</AdditionalLibraryDirectories>
       <AdditionalOptions>%(AdditionalOptions) /machine:ARM64 /PDBALTPATH:$(TargetName).pdb</AdditionalOptions>
       <EnableCOMDATFolding>false</EnableCOMDATFolding>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -234,6 +235,8 @@
     </ProjectReference>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\CrossPlatform\AppController.cpp" />
+    <ClCompile Include="..\CrossPlatform\tiny_obj_loader.cpp" />
     <ClCompile Include="BasicHologramMain.cpp" />
     <ClCompile Include="Common\CameraResources.cpp" />
     <ClCompile Include="Common\DeviceResources.cpp" />
@@ -250,6 +253,11 @@
     <ClCompile Include="Content\ZAxisModel.cpp" />
     <ClCompile Include="SensorVisualizationScenario.cpp" />
     <ClCompile Include="Texture2D.cpp" />
+    <ClInclude Include="..\CrossPlatform\AppController.h" />
+    <ClInclude Include="..\CrossPlatform\Log.h" />
+    <ClInclude Include="..\CrossPlatform\MemoryStream.h" />
+    <ClInclude Include="..\CrossPlatform\Models.h" />
+    <ClInclude Include="..\CrossPlatform\tiny_obj_loader.h" />
     <ClInclude Include=".\pch.h" />
     <ClCompile Include=".\pch.cpp" />
     <ClInclude Include=".\SamplePlayerMain.h" />
@@ -410,6 +418,7 @@
       <HeaderFileOutput>.\shaders\%(Filename).h</HeaderFileOutput>
       <VariableName>%(Filename)</VariableName>
     </FXCompile>
+    <None Include="bin\Debug\AppX\VuforiaEngine.dll" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

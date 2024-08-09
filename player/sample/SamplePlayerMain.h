@@ -19,8 +19,15 @@
 #include "../common/Content/StatusDisplay.h"
 #include "../common/IpAddressUpdater.h"
 #include "../common/PlayerFrameStatisticsHelper.h"
+#include <winrt/Windows.Graphics.Display.h>
+#include <AppController.h>
+#include <Log.h>
 
 #include <winrt/Microsoft.Holographic.AppRemoting.h>
+
+#include "Rendering/DXRenderer.h"
+#include "Rendering/DeviceResources.h"
+#include "Rendering/StepTimer.h"
 
 #include <chrono>
 
@@ -55,6 +62,7 @@ public:
     winrt::Windows::ApplicationModel::Core::IFrameworkView CreateView();
 
     // IFrameworkView methods
+    void InitDone();
     void Initialize(const winrt::Windows::ApplicationModel::Core::CoreApplicationView& applicationView);
     void SetWindow(const winrt::Windows::UI::Core::CoreWindow& window);
     void Load(const winrt::hstring& entryPoint);
@@ -77,6 +85,8 @@ private:
     };
 
 private:
+
+    
     // Load the holographic remoting logo image
     void LoadLogoImage();
 
@@ -113,6 +123,15 @@ private:
     void OnWindowClosed(const winrt::Windows::UI::Core::CoreWindow& sender, const winrt::Windows::UI::Core::CoreWindowEventArgs& args);
 
 private:
+
+    AppController mController;
+    bool mVuforiaInitializing = false;
+    std::atomic<bool> mVuforiaStarted = false;
+    /// Expected lifecycle state of the application
+    std::atomic<bool> mAppShouldBeRunning{false};
+
+    concurrency::task<bool> mLifecycleOperation = concurrency::task_from_result(false);
+
     // Cached pointer to device resources.
     std::shared_ptr<DXHelper::DeviceResourcesD3D11Holographic> m_deviceResources;
 
