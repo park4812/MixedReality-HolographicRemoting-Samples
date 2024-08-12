@@ -418,6 +418,32 @@ void SamplePlayerMain::InitDone()
 
 }
 
+void SamplePlayerMain::StartController()
+{
+
+    AppController::InitConfig config;
+    config.vbRenderBackend = VU_RENDER_VB_BACKEND_DX11;
+    config.initDoneCallback = std::bind(&SamplePlayerMain::InitDone, this);
+
+
+    mVuforiaInitializing = true;
+    //mController.initAR(config, 0);
+
+    /*
+    mVuforiaStarted = mController.startAR();
+    if (mVuforiaStarted)
+    {
+        // 성공적으로 시작했을 때의 로직
+    }
+    else
+    {
+        // 시작 실패 처리
+    }
+    */
+}
+
+
+
 void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
 {
     // Create the player context
@@ -429,14 +455,15 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
     {
         // 홀로그래픽 디스플레이 장치로 스트리밍하는 기술
         m_playerContext = PlayerContext::Create();
+        mControllerThread = std::thread(&SamplePlayerMain::StartController, this);
 
-        AppController::InitConfig config;
-        config.vbRenderBackend = VU_RENDER_VB_BACKEND_DX11;
-        config.initDoneCallback = std::bind(&SamplePlayerMain::InitDone, this);
+        //AppController::InitConfig config;
+        //config.vbRenderBackend = VU_RENDER_VB_BACKEND_DX11;
+        //config.initDoneCallback = std::bind(&SamplePlayerMain::InitDone, this);
 
 
-        mVuforiaInitializing = true;
-        mController.initAR(config, 0);
+        //mVuforiaInitializing = true;
+        //mController.initAR(config, 0);
     }
     catch (winrt::hresult_error)
     {

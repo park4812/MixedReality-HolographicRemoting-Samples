@@ -125,6 +125,9 @@ private:
 private:
 
     AppController mController;
+    std::thread mControllerThread;
+    void StartController(); // mController를 실행하는 함수
+
     bool mVuforiaInitializing = false;
     std::atomic<bool> mVuforiaStarted = false;
     /// Expected lifecycle state of the application
