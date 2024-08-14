@@ -389,6 +389,10 @@ AppController::getImageTargetResult(VuMatrix44F& projectionMatrix, VuMatrix44F& 
     VuObservationList* observationList = nullptr;
     REQUIRE_SUCCESS(vuObservationListCreate(&observationList));
 
+    // mEngine
+    if (mVuforiaState == nullptr)
+        return false;
+
     if (vuStateGetImageTargetObservations(mVuforiaState, observationList) != VU_SUCCESS)
     {
         //LOG("Error getting image target observations");
@@ -927,7 +931,9 @@ AppController::createObservers()
         imageTargetConfig.activate = VU_TRUE;
 
         VuImageTargetCreationError imageTargetCreationError;
-        if (vuEngineCreateImageTargetObserver(mEngine, &mObjectObserver, &imageTargetConfig, &imageTargetCreationError) != VU_SUCCESS)
+
+        auto result = vuEngineCreateImageTargetObserver(mEngine, &mObjectObserver, &imageTargetConfig, &imageTargetCreationError);
+        if (result != VU_SUCCESS)
         {
             //LOG("Error creating image target observer: 0x%02x", imageTargetCreationError);
             mErrorMessageCallback("Error creating image target observer");

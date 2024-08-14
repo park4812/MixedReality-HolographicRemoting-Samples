@@ -100,7 +100,6 @@ private:
     void OnCustomDataChannelDataReceived(winrt::array_view<const uint8_t> dataView);
     void OnCustomDataChannelClosed();
 #endif
-
     // PlayerContext event handlers
     void OnConnected();
     void OnDisconnected(winrt::Microsoft::Holographic::AppRemoting::ConnectionFailureReason reason);

@@ -305,6 +305,12 @@
     <ClInclude Include="researchmode\ResearchModeApi.h" />
     <ClInclude Include="SensorVisualizationScenario.h" />
     <ClInclude Include="Texture2D.h" />
+    <None Include="..\Assets\ImageTargets\StonesAndChips.dat">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</DeploymentContent>
+    </None>
+    <None Include="..\Assets\ModelTargets\VuforiaMars_ModelTarget.dat">
+      <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</DeploymentContent>
+    </None>
     <None Include=".\Assets\RemotingLogo.dds">
       <Link>.\%(FileName)%(Extension)</Link>
       <DeploymentContent Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">true</DeploymentContent>
@@ -419,6 +425,10 @@
       <VariableName>%(Filename)</VariableName>
     </FXCompile>
     <None Include="bin\Debug\AppX\VuforiaEngine.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Assets\ImageTargets\StonesAndChips.xml" />
+    <Xml Include="..\Assets\ModelTargets\VuforiaMars_ModelTarget.xml" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

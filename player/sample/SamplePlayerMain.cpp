@@ -418,6 +418,7 @@ void SamplePlayerMain::InitDone()
 
 }
 
+
 void SamplePlayerMain::StartController()
 {
 
@@ -425,9 +426,41 @@ void SamplePlayerMain::StartController()
     config.vbRenderBackend = VU_RENDER_VB_BACKEND_DX11;
     config.initDoneCallback = std::bind(&SamplePlayerMain::InitDone, this);
 
+        config.vuforiaEngineErrorCallback = [this](VuErrorCode errorCode) {
+        //LOG("Vuforia engine error callback invoked. Error code: 0x%02x", errorCode);
+
+        switch (errorCode)
+        {
+            case VU_ENGINE_ERROR_INVALID_LICENSE:
+                //LOG("License key validation has failed, Engine has been stopped.");
+                break;
+            case VU_ENGINE_ERROR_CAMERA_DEVICE_LOST:
+                //LOG("Camera device lost (the device has been disconnected, is in use by another app or has become unavailable for "
+                //             "another reason)");
+                break;
+            default:
+                //LOG("Got an unexpected Engine error code 0x%02x", errorCode);
+                assert(false);
+                break;
+        }
+    };
 
     mVuforiaInitializing = true;
-    //mController.initAR(config, 0);
+
+    try
+    {
+        mController.initAR(config, 0);
+        // 여기에 예외가 발생할 가능성이 있는 코드를 넣습니다.
+        // 문제가 발생할 것 같은 코드를 실행합니다.
+        //throw "An error occurred"; // 문자열 예외를 발생시킵니다.
+    }
+    catch (const char* msg)
+    {
+        // 예외가 발생했을 때 실행할 코드를 넣습니다.
+        std::string sd  =  msg;
+
+        int d = 4;
+    }
 
     /*
     mVuforiaStarted = mController.startAR();
@@ -455,7 +488,6 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
     {
         // 홀로그래픽 디스플레이 장치로 스트리밍하는 기술
         m_playerContext = PlayerContext::Create();
-        mControllerThread = std::thread(&SamplePlayerMain::StartController, this);
 
         //AppController::InitConfig config;
         //config.vbRenderBackend = VU_RENDER_VB_BACKEND_DX11;
@@ -535,7 +567,6 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
     }
 
 
-
     // mVuforiaStarted = mController.startAR();
 }
 
@@ -605,6 +636,10 @@ void SamplePlayerMain::SetWindow(const CoreWindow& window)
 
 void SamplePlayerMain::Load(const winrt::hstring& entryPoint)
 {
+    mControllerThread = std::thread(&SamplePlayerMain::StartController, this);
+
+
+
 }
 
 void SamplePlayerMain::Run()
@@ -623,16 +658,16 @@ void SamplePlayerMain::Run()
         Duration timeSinceLastUpdate = timeCurrUpdate - timeLastUpdate;
         float deltaTimeInSeconds = std::chrono::duration<float>(timeSinceLastUpdate).count();
 
-        //std::wostringstream woss;
-        //woss << deltaTimeInSeconds;
-        //m_errorHelper.AddError(woss.str());
+        // std::wostringstream woss;
+        // woss << deltaTimeInSeconds;
+        // m_errorHelper.AddError(woss.str());
 
 
         // If we encountered an error while creating the player context, we are going to provide
         // users with some feedback here. We have to do this after the application has launched
         // or we are going to fail at showing the dialog box.
-        //"플레이어 컨텍스트를 생성하는 동안 오류가 발생했다면, 여기서 사용자에게 피드백을 제공할 것입니다. 이 작업은 애플리케이션이 시작된 "
-        //"후에 수행해야 하며, 그렇지 않으면 대화 상자를 표시하는 데 실패할 것입니다."
+        //"플레이어 컨텍스트를 생성하는 동안 오류가 발생했다면, 여기서 사용자에게 피드백을 제공할 것입니다. 이 작업은 애플리케이션이 시작된
+        //" "후에 수행해야 하며, 그렇지 않으면 대화 상자를 표시하는 데 실패할 것입니다."
         if (m_failedToCreatePlayerContext && !m_shownFeedbackToUser)
         {
             CoreWindow coreWindow{CoreApplication::MainView().CoreWindow().GetForCurrentThread()};
@@ -674,6 +709,17 @@ void SamplePlayerMain::Run()
         else
         {
             CoreWindow::GetForCurrentThread().Dispatcher().ProcessEvents(CoreProcessEventsOption::ProcessOneAndAllPending);
+        }
+
+
+        VuMatrix44F trackableProjection;
+        VuMatrix44F trackableModelView;
+        VuMatrix44F trackableModelViewScaled;
+        VuImageInfo modelTargetGuideViewImage;
+        VuBool guideViewImageHasChanged;
+        if (mController.getImageTargetResult(trackableProjection, trackableModelView, trackableModelViewScaled))
+        {
+            // mRenderer->renderImageTarget(trackableProjection, trackableModelView, trackableModelViewScaled);
         }
 
         timeLastUpdate = timeCurrUpdate;
