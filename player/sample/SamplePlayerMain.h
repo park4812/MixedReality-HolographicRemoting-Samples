@@ -34,6 +34,11 @@
 #include <DeviceResourcesD3D11Holographic.h>
 #include <SimpleCubeRenderer.h>
 
+
+#include "Common\DeviceResources.h"
+#include "BasicHologramMain.h"
+
+
 class SamplePlayerMain : public winrt::implements<
                              SamplePlayerMain,
                              winrt::Windows::ApplicationModel::Core::IFrameworkViewSource,
@@ -43,7 +48,7 @@ class SamplePlayerMain : public winrt::implements<
 public:
     SamplePlayerMain();
     ~SamplePlayerMain();
-
+    void test();
     // Try to (re-)connect to or listen on the hostname/port, that was set during activation of the app.
     void ConnectOrListen();
 
@@ -134,6 +139,10 @@ private:
 
     concurrency::task<bool> mLifecycleOperation = concurrency::task_from_result(false);
 
+    std::unique_ptr<BasicHologram::BasicHologramMain> m_main;
+    std::shared_ptr<DX::DeviceResources> m_deviceResources1;
+    winrt::Windows::Graphics::Holographic::HolographicSpace m_holographicSpace = nullptr;
+
     // Cached pointer to device resources.
     std::shared_ptr<DXHelper::DeviceResourcesD3D11Holographic> m_deviceResources;
 
@@ -212,4 +221,19 @@ private:
     // Indicates that at least one remote frame was blitted
     // 적어도 하나의 원격 프레임이 블리트되었음
     bool m_firstRemoteFrameWasBlitted = false;
+
+    
+    protected:
+    IResearchModeSensorDevice* m_pSensorDevice;
+    IResearchModeSensorDeviceConsent* m_pSensorDeviceConsent;
+    std::vector<ResearchModeSensorDescriptor> m_sensorDescriptors;
+    IResearchModeSensor* m_pLFCameraSensor = nullptr;
+    IResearchModeSensor* m_pRFCameraSensor = nullptr;
+    IResearchModeSensor* m_pLTSensor = nullptr;
+    IResearchModeSensor* m_pAHATSensor = nullptr;
+    IResearchModeSensor* m_pAccelSensor = nullptr;
+    IResearchModeSensor* m_pGyroSensor = nullptr;
+    IResearchModeSensor* m_pMagSensor = nullptr;
+
+    std::thread* m_pCameraUpdateThread;
 };

@@ -375,6 +375,7 @@ AppController::getOrigin(VuMatrix44F& projectionMatrix, VuMatrix44F& modelViewMa
     return false;
 }
 
+bool isStart = false;
 
 bool
 AppController::getImageTargetResult(VuMatrix44F& projectionMatrix, VuMatrix44F& modelViewMatrix, VuMatrix44F& scaledModelViewMatrix)
@@ -389,11 +390,14 @@ AppController::getImageTargetResult(VuMatrix44F& projectionMatrix, VuMatrix44F& 
     VuObservationList* observationList = nullptr;
     REQUIRE_SUCCESS(vuObservationListCreate(&observationList));
 
-    // mEngine
-    if (mVuforiaState == nullptr)
+    if (mEngine == nullptr)
         return false;
 
-    if (vuStateGetImageTargetObservations(mVuforiaState, observationList) != VU_SUCCESS)
+    //AR:ERROR: Vuforia is not running
+    if (vuEngineAcquireLatestState(mEngine, &mVuforiaState) != VU_SUCCESS)
+        return false;
+    auto vuState = vuStateGetImageTargetObservations(mVuforiaState, observationList);
+    if (vuState != VU_SUCCESS)
     {
         //LOG("Error getting image target observations");
         REQUIRE_SUCCESS(vuObservationListDestroy(observationList));
