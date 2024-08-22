@@ -51,6 +51,8 @@ using namespace winrt::Windows::Perception::Spatial;
 using namespace winrt::Windows::UI::Core;
 using namespace winrt::Windows::UI::Input::Spatial;
 
+AppController SamplePlayerMain::mController;
+
 extern "C"
 HMODULE LoadLibraryA(
     LPCSTR lpLibFileName
@@ -256,11 +258,17 @@ HolographicFrame SamplePlayerMain::Update(float deltaTimeInSeconds, const Hologr
                 const float imageOffsetX = m_trackingLost ? -0.0095f : -0.0125f;
                 const float imageOffsetY = 0.0111f;
                 m_statusDisplay->PositionDisplay(deltaTimeInSeconds, visibleFrustumReference.Value(), imageOffsetX, imageOffsetY);
+
             }
         }
 
         focusPointCoordinateSystem = coordinateSystem;
         focusPointPosition = m_statusDisplay->GetPosition();
+
+
+        //std::wostringstream ss;
+        //ss << L"hololens Position X: " << focusPointPosition.x << L", Y: " << focusPointPosition.y << L", Z: " << focusPointPosition.z << "\n";
+        //OutputDebugString(ss.str().c_str());
     }
 
     // Update content of the status and error display.
@@ -513,6 +521,8 @@ void SamplePlayerMain::InitDone()
         mLifecycleOperation = concurrency::task_from_result(true);
     }
 
+
+
 }
 
 
@@ -559,17 +569,6 @@ void SamplePlayerMain::StartController()
         int d = 4;
     }
 
-    /*
-    mVuforiaStarted = mController.startAR();
-    if (mVuforiaStarted)
-    {
-        // 성공적으로 시작했을 때의 로직
-    }
-    else
-    {
-        // 시작 실패 처리
-    }
-    */
 }
 
 static ResearchModeSensorConsent camAccessCheck;
@@ -625,6 +624,8 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
         // 홀로그래픽 디스플레이 장치로 스트리밍하는 기술
         m_playerContext = PlayerContext::Create();
 
+        //mController.configureRendering(1440, 936, nullptr);
+        /*
        HRESULT hr = S_OK;
         size_t sensorCount = 0;
         camConsentGiven = CreateEvent(nullptr, true, false, nullptr);
@@ -680,7 +681,7 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
             if (sensorDescriptor.sensorType == DEPTH_LONG_THROW)
             {
                 winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pLTSensor));
-                m_pSensorDevice->AddRef();
+                //m_pSensorDevice->AddRef();
 
                 winrt::check_hresult(m_pLTSensor->OpenStream());
 
@@ -705,6 +706,7 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
                 winrt::check_hresult(m_pSensorDevice->GetSensor(sensorDescriptor.sensorType, &m_pMagSensor));
             }
         }
+        */
     }
     catch (winrt::hresult_error)
     {
@@ -712,6 +714,11 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
         // 여기에 도달했다면, 윈도우 홀로그래픽이 설치되어 있지 않을 가능성이 높습니다.
 
         m_failedToCreatePlayerContext = true;
+
+        // 1.7, 디그리, 라디안
+        // 포팅먼저 확인
+        // 0
+        //                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
         // Return right away to avoid bringing down the application. This allows us to
         // later provide feedback to users about this failure.
         // 애플리케이션을 종료하지 않도록 즉시 반환합니다.
@@ -775,8 +782,6 @@ void SamplePlayerMain::Initialize(const CoreApplicationView& applicationView)
 #endif
     }
 
-
-    // mVuforiaStarted = mController.startAR();
 }
 
 void SamplePlayerMain::SetWindow(const CoreWindow& window)
@@ -905,7 +910,6 @@ void SamplePlayerMain::Run()
             m_shownFeedbackToUser = true;
         }
 
-        //if (m_windowVisible && m_deviceResources != nullptr && (m_deviceResources->GetHolographicSpace() != nullptr))
         if (m_windowVisible && m_deviceResources != nullptr && (m_deviceResources->GetHolographicSpace() != nullptr))
         {
             CoreWindow::GetForCurrentThread().Dispatcher().ProcessEvents(CoreProcessEventsOption::ProcessAllIfPresent);
@@ -914,7 +918,7 @@ void SamplePlayerMain::Run()
             Render(holographicFrame);
             prevHolographicFrame = holographicFrame;
 
-            
+            //TODO : RUN 추가 뷰포리아
             VuMatrix44F trackableProjection;
             VuMatrix44F trackableModelView;
             VuMatrix44F trackableModelViewScaled;
@@ -924,9 +928,14 @@ void SamplePlayerMain::Run()
             //bool result = true;
             if (mVuforiaStarted)
             {
-
                 bool result = mController.getImageTargetResult(trackableProjection, trackableModelView, trackableModelViewScaled);
-                mController.finishRender();
+
+                if (result)
+                {
+
+                }
+
+                //mController.finishRender();
             }
             
         }

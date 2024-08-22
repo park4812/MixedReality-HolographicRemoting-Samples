@@ -9,12 +9,13 @@ countries.
 #define __APPCONTROLLER_H__
 
 #include <VuforiaEngine/VuforiaEngine.h>
-
+#define NOMINMAX
 #include <chrono>
 #include <cstdio>
 #include <functional>
 #include <memory>
 #include <string>
+#include <windows.h>
 
 
 /// The AppController provides a platform-independent encapsulation of the Vuforia lifecycle

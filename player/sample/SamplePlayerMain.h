@@ -65,7 +65,7 @@ public:
 public:
     // IFrameworkViewSource methods
     winrt::Windows::ApplicationModel::Core::IFrameworkView CreateView();
-
+    static AppController mController;
     // IFrameworkView methods
     void InitDone();
     void Initialize(const winrt::Windows::ApplicationModel::Core::CoreApplicationView& applicationView);
@@ -82,10 +82,10 @@ private:
     // Options for the player which can passed in via activation arguments
     struct PlayerOptions
     {
-        winrt::hstring m_hostname = L"192.168.0.142";
+        winrt::hstring m_hostname = L"192.168.0.159";
         uint16_t m_port = 0;
-        bool m_listen = false;
-        bool m_showStatistics = true;
+        bool m_listen = true;
+        bool m_showStatistics = false;
         bool m_ipv6 = false;
     };
 
@@ -128,7 +128,7 @@ private:
 
 private:
 
-    AppController mController;
+    
     std::thread mControllerThread;
     void StartController(); // mController를 실행하는 함수
 

@@ -9,13 +9,18 @@ countries.
 
 #include "Log.h"
 
+//#include<SamplePlayerMain.h>
 #include <algorithm>
 #include <cassert>
 #include <cmath>
+#include <iostream>
 #include <functional>
+#include <windows.h>
 #include <string>
+#include <cmath>
 
-
+#include <DirectXMath.h>
+using namespace DirectX;
 #ifdef VU_PLATFORM_ANDROID
 /// JVM pointer captured in the VuforiaWrapper for Android
 extern void* javaVM;
@@ -93,7 +98,7 @@ AppController::startAR()
     // Get the camera controller to access camera settings
     VuController* cameraController = nullptr;
     REQUIRE_SUCCESS(vuEngineGetCameraController(mEngine, &cameraController));
-
+    //REQUIRE_SUCCESS(vuEngineGetRenderController(mEngine, &mRenderController));
     // Select the camera mode to the preferred value before starting engine
     if (vuCameraControllerSetActiveVideoMode(cameraController, mCameraVideoMode) != VU_SUCCESS)
     {
@@ -116,6 +121,9 @@ AppController::startAR()
     }
 
     //LOG("Successfully started Vuforia");
+
+    //SamplePlayerMain::mController.configureRendering(1440, 936, &m_d3dViewport);
+    //SamplePlayerMain::mController.configureRendering(1440, 936, nullptr);
     return true;
 }
 
@@ -167,7 +175,7 @@ AppController::deinitAR()
 
     destroyObservers();
 
-    // Destroy engine instance
+    // Destroy engine instancevuEngineGetRenderController
     if (vuEngineDestroy(mEngine) != VU_SUCCESS)
     {
         //LOG("Failed to destroy engine instance");
@@ -230,6 +238,8 @@ AppController::cameraRestoreAutoFocus()
 bool
 AppController::configureRendering(int width, int height, void* orientation)
 {
+    /* TODO: 우선 StartAR이 진행된 후 실행되어야 함.
+    
     if (!mARStarted)
     {
         return false;
@@ -247,6 +257,9 @@ AppController::configureRendering(int width, int height, void* orientation)
         //LOG("Failed to set orientation");
         return false;
     }
+
+    1440, 936
+    */
 
     mDisplayAspectRatio = (float)width / height;
 
@@ -377,9 +390,30 @@ AppController::getOrigin(VuMatrix44F& projectionMatrix, VuMatrix44F& modelViewMa
 
 bool isStart = false;
 
+
+float radiansToDegrees(float radians) {
+    return radians * (180.0f / M_PI);
+}
+
+//TODO : 이미지타겟 인식 결과
 bool
 AppController::getImageTargetResult(VuMatrix44F& projectionMatrix, VuMatrix44F& modelViewMatrix, VuMatrix44F& scaledModelViewMatrix)
 {
+    if (vuEngineAcquireLatestState(mEngine, &mVuforiaState) != VU_SUCCESS)
+    {
+        return false;
+    }
+
+    if (vuStateHasCameraFrame(mVuforiaState) != VU_TRUE)
+    {
+        return false;
+    }
+
+    if (vuStateGetRenderState(mVuforiaState, &mCurrentRenderState) != VU_SUCCESS)
+    {
+        return false;
+    }
+
     bool result = false;
 
     if (mTarget != IMAGE_TARGET_ID)
@@ -429,6 +463,8 @@ AppController::getImageTargetResult(VuMatrix44F& projectionMatrix, VuMatrix44F& 
 
                 // Compute model-view matrix
                 auto modelMatrix = poseInfo.pose;
+
+
                 modelViewMatrix = vuMatrix44FMultiplyMatrix(mCurrentRenderState.viewMatrix, modelMatrix);
 
                 // Calculate a scaled modelViewMatrix for rendering a unit bounding box
@@ -441,6 +477,71 @@ AppController::getImageTargetResult(VuMatrix44F& projectionMatrix, VuMatrix44F& 
                 scale.data[2] = std::max(scale.data[0], scale.data[1]);
                 scaledModelViewMatrix = vuMatrix44FScale(scale, modelViewMatrix);
 
+                auto deviceMatrix1 = vuMatrix44FInverse(modelMatrix);
+
+
+                auto deviceMatrix = vuMatrix44FInverse(modelViewMatrix);
+
+                VuMatrix44F matrix = modelViewMatrix;
+
+                auto deviceMatrix2 = vuMatrix44FInverse(mCurrentRenderState.viewMatrix);
+                float posX = matrix.data[12];
+                float posY = matrix.data[13];
+                float posZ = matrix.data[14];
+
+                // X축 회전
+                float m00 = matrix.data[0];  // 첫 번째 행, 첫 번째 열
+                float m01 = matrix.data[1];  // 첫 번째 행, 두 번째 열
+                float m02 = matrix.data[2];  // 첫 번째 행, 세 번째 열
+
+                // Y축 회전
+                float m10 = matrix.data[4];  // 두 번째 행, 첫 번째 열
+                float m11 = matrix.data[5];  // 두 번째 행, 두 번째 열
+                float m12 = matrix.data[6];  // 두 번째 행, 세 번째 열
+
+                // Z축 회전
+                float m20 = matrix.data[8];  // 세 번째 행, 첫 번째 열
+                float m21 = matrix.data[9];  // 세 번째 행, 두 번째 열
+                float m22 = matrix.data[10]; // 세 번째 행, 세 번째 열
+
+
+                float pitch = std::asin(-m20);                              // Pitch
+                float yaw = std::atan2(m10, m00);                           // Yaw
+                float roll = std::atan2(m21, m22);                          // Roll
+
+                std::wostringstream ss;
+
+                ss << L"Position X: " << posX << L", Y: " << posY << L", Z: " << posZ << "\n";
+                ss << L"Rotation: Pitch: " << pitch << L", Yaw: " << yaw << L", Roll: " << roll << "\n";
+
+                OutputDebugString(ss.str().c_str());
+
+
+
+                /*
+
+                float posX = deviceMatrix1.data[12];
+                float posY = deviceMatrix1.data[13];
+                float posZ = deviceMatrix1.data[14];
+
+
+                float posX = deviceMatrix.data[12];
+                float posY = deviceMatrix.data[13];
+                float posZ = deviceMatrix.data[14];
+
+
+                float posX = mCurrentRenderState.viewMatrix.data[12];
+                float posY = mCurrentRenderState.viewMatrix.data[13];
+                float posZ = mCurrentRenderState.viewMatrix.data[14];
+                
+
+                float posX = scaledModelViewMatrix.data[12];
+                float posY = scaledModelViewMatrix.data[13];
+                float posZ = scaledModelViewMatrix.data[14];
+                */
+
+
+                poseInfo.poseStatus = VU_OBSERVATION_POSE_STATUS_NO_POSE;
                 result = true;
             }
         }
