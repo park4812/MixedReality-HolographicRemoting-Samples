@@ -392,7 +392,8 @@ bool isStart = false;
 
 
 float radiansToDegrees(float radians) {
-    return radians * (180.0f / M_PI);
+    //return radians * (180.0f / M_PI);
+    return radians * (180.0f / 3.14159265358979323846);
 }
 
 //TODO : 이미지타겟 인식 결과

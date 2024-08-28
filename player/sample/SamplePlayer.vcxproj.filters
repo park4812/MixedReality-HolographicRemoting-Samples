@@ -65,6 +65,8 @@
     </ClCompile>
     <ClCompile Include="BasicHologramMain.cpp" />
     <ClCompile Include="SensorVisualizationScenario.cpp" />
+    <ClCompile Include="..\CrossPlatform\AppController.cpp" />
+    <ClCompile Include="..\CrossPlatform\tiny_obj_loader.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include=".\pch.h" />
@@ -136,6 +138,11 @@
     </ClInclude>
     <ClInclude Include="BasicHologramMain.h" />
     <ClInclude Include="SensorVisualizationScenario.h" />
+    <ClInclude Include="..\CrossPlatform\AppController.h" />
+    <ClInclude Include="..\CrossPlatform\Log.h" />
+    <ClInclude Include="..\CrossPlatform\MemoryStream.h" />
+    <ClInclude Include="..\CrossPlatform\Models.h" />
+    <ClInclude Include="..\CrossPlatform\tiny_obj_loader.h" />
   </ItemGroup>
   <ItemGroup>
     <Image Include=".\Assets\LockScreenLogo.scale-200.png" />
@@ -152,6 +159,10 @@
   <ItemGroup>
     <None Include=".\Assets\RemotingLogo.dds" />
     <None Include=".\Assets\MixedRealityModel.glb" />
+    <None Include="..\Assets\ImageTargets\StonesAndChips.dat" />
+    <None Include="..\Assets\ModelTargets\VuforiaMars_ModelTarget.dat" />
+    <None Include="bin\Debug\AppX\VuforiaEngine.dll" />
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Content">
@@ -163,5 +174,9 @@
     <Filter Include="Content\Shaders">
       <UniqueIdentifier>{dab477ef-9227-4c42-ac92-a75072c11b70}</UniqueIdentifier>
     </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <Xml Include="..\Assets\ImageTargets\StonesAndChips.xml" />
+    <Xml Include="..\Assets\ModelTargets\VuforiaMars_ModelTarget.xml" />
   </ItemGroup>
 </Project>
